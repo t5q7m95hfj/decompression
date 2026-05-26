@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<title>DLL260527 · Airport Op</title>
+<style>
+:root{
+  --bg:#f0ede8;--s1:#ffffff;--s2:#e8e4de;--s3:#ddd8d0;
+  --bdr:rgba(0,0,0,.10);--bdr2:rgba(0,0,0,.16);--bdr3:rgba(0,0,0,.24);
+  --t0:#0f0d0a;--t1:#2e2b26;--t2:#5a5650;--t3:#8a8680;
+  --gold:#7a5600;--goldbg:#fff3cc;--goldbdr:#e8c840;
+  --grn:#1a6e30;--grnbg:#d4f0dc;--grnbdr:#5abf78;
+  --red:#a01818;--redbg:#fde8e8;--redbdr:#e06060;
+  --blue:#1040a0;--bluebg:#ddeeff;--bluebdr:#5090e0;
+  --amb:#8a4000;--ambbg:#fdeedd;--ambbdr:#e08030;
+  --r:10px;--rsm:7px;
+  --f:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  --fm:'SF Mono',SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100%;overscroll-behavior:none;}
+body{font-family:var(--f);background:var(--bg);color:var(--t0);font-size:16px;line-height:1.5;padding-bottom:60px;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+a{color:inherit;text-decoration:none;}
+
+/* HEADER */
+.hdr{background:var(--s1);border-bottom:2px solid var(--bdr2);padding:12px 16px 10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.mission-id{font-size:13px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);font-family:var(--fm);}
+.clock{font-size:22px;font-weight:700;color:var(--t0);font-family:var(--fm);}
+.hdr-date{font-size:13px;color:var(--t2);font-weight:500;margin-bottom:6px;}
+.hdr-bottom{display:flex;align-items:center;gap:8px;}
+.pax-prog-wrap{flex:1;}
+.pax-prog-bar{height:5px;background:var(--s3);border-radius:3px;}
+.pax-prog-fill{height:100%;background:var(--grn);border-radius:3px;transition:width .4s ease;}
+.pax-prog-label{font-size:12px;color:var(--t2);margin-top:4px;display:flex;justify-content:space-between;font-weight:600;}
+.quota-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;background:var(--s2);border:1.5px solid var(--bdr2);border-radius:6px;padding:3px 9px;cursor:default;}
+.quota-chip.warn{background:var(--goldbg);border-color:var(--goldbdr);}
+.quota-chip.danger{background:var(--redbg);border-color:var(--redbdr);}
+.quota-n{font-size:16px;font-weight:800;font-family:var(--fm);color:var(--t0);line-height:1.1;}
+.quota-chip.warn .quota-n{color:var(--gold);}
+.quota-chip.danger .quota-n{color:var(--red);}
+.quota-l{font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--t3);}
+
+/* CONTACTS */
+.contacts-wrap{background:var(--s1);border-bottom:1px solid var(--bdr2);}
+.contacts-toggle{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;cursor:pointer;}
+.contacts-toggle:active{background:var(--s2);}
+.contacts-toggle-label{font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--t2);}
+.contacts-toggle-right{display:flex;align-items:center;gap:8px;}
+.contacts-count{font-size:11px;background:var(--s2);color:var(--t2);padding:2px 8px;border-radius:4px;font-weight:600;border:1px solid var(--bdr);}
+.contacts-chevron{font-size:11px;color:var(--t3);transition:transform .2s;}
+.contacts-wrap.open .contacts-chevron{transform:rotate(180deg);}
+.contacts-body{display:none;padding:2px 16px 11px;}
+.contacts-wrap.open .contacts-body{display:flex;flex-direction:column;gap:8px;}
+.contact-row{display:flex;align-items:center;gap:8px;}
+.ctag{font-size:11px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--t2);width:58px;flex-shrink:0;}
+.cname{font-size:15px;color:var(--t0);font-weight:600;margin-right:4px;}
+.cphone{font-size:14px;color:var(--blue);font-family:var(--fm);font-weight:600;}
+
+/* CONTENT */
+.inner{padding:12px 14px;}
+.slbl{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--t2);padding:14px 0 8px;display:flex;align-items:center;justify-content:space-between;}
+.slbl:first-child{padding-top:4px;}
+.slbl-cnt{font-size:11px;font-weight:700;color:var(--t2);background:var(--s2);padding:3px 9px;border-radius:4px;border:1px solid var(--bdr);}
+
+/* STATS */
+.stats-bar{display:flex;gap:8px;margin-bottom:14px;}
+.stat{flex:1;background:var(--s1);border:1.5px solid var(--bdr2);border-radius:var(--rsm);padding:10px 8px;text-align:center;}
+.stat-n{font-size:24px;font-weight:700;color:var(--t0);line-height:1;font-family:var(--fm);}
+.stat-n.grn{color:var(--grn);}
+.stat-n.gold{color:var(--gold);}
+.stat-l{font-size:11px;color:var(--t2);margin-top:4px;letter-spacing:.3px;text-transform:uppercase;font-weight:600;}
+
+/* FLIGHT GROUP */
+.fgroup{background:var(--s1);border:1.5px solid var(--bdr2);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.fgroup.private{border-color:var(--ambbdr);border-width:2px;}
+.fgroup-hdr{padding:11px 13px;display:flex;align-items:center;gap:9px;cursor:pointer;}
+.fgroup-hdr:active{background:var(--s2);}
+.fgroup.private .fgroup-hdr{background:var(--ambbg);}
+.fgroup.private .fgroup-hdr:active{background:#f5d8b8;}
+.flight-badge{font-size:12px;font-weight:800;font-family:var(--fm);background:var(--bluebg);color:var(--blue);border:1.5px solid var(--bluebdr);padding:4px 9px;border-radius:5px;letter-spacing:.3px;white-space:nowrap;}
+.fgroup.private .flight-badge{background:var(--ambbg);color:var(--amb);border-color:var(--ambbdr);}
+.flight-time{font-size:15px;font-weight:700;color:var(--t0);}
+.flight-org{font-size:12px;color:var(--t2);font-weight:600;margin-left:auto;}
+.flight-paxcount{font-size:12px;font-weight:700;color:var(--t2);background:var(--s2);padding:3px 9px;border-radius:4px;border:1px solid var(--bdr);margin-left:6px;}
+.flight-paxcount.done{background:var(--grnbg);color:var(--grn);border-color:var(--grnbdr);}
+.private-tag{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;background:var(--ambbg);color:var(--amb);border:1px solid var(--ambbdr);padding:2px 6px;border-radius:3px;}
+.fgroup-chevron{font-size:13px;color:var(--t3);margin-left:4px;transition:transform .2s;flex-shrink:0;}
+.fgroup.open .fgroup-chevron{transform:rotate(180deg);}
+.fgroup-body{display:none;border-top:1px solid var(--bdr);}
+.fgroup.open .fgroup-body{display:block;}
+
+/* FLIGHT STATUS PANEL — collapsed by default, manual fetch only */
+.fsp-wrap{border-bottom:1px solid var(--bdr);}
+.fsp-toggle{display:flex;align-items:center;gap:8px;padding:8px 13px;background:var(--s2);cursor:pointer;}
+.fsp-toggle:active{background:var(--s3);}
+.fsp-toggle-lbl{font-size:12px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--t2);}
+.fsp-status-inline{flex:1;display:flex;align-items:center;gap:6px;}
+.fsp-open-chevron{font-size:11px;color:var(--t3);transition:transform .15s;margin-left:auto;}
+.fsp-wrap.open .fsp-open-chevron{transform:rotate(180deg);}
+.fsp-body{display:none;padding:9px 13px;background:var(--s2);border-top:1px solid var(--bdr);display:none;align-items:center;gap:8px;flex-wrap:wrap;}
+.fsp-wrap.open .fsp-body{display:flex;}
+
+/* status badges */
+.fs-badge{font-size:11px;font-weight:700;letter-spacing:.3px;padding:3px 9px;border-radius:4px;text-transform:uppercase;white-space:nowrap;border:1px solid;}
+.fs-badge.scheduled{background:#e8eeff;color:#1040a0;border-color:#90b0e8;}
+.fs-badge.active{background:var(--goldbg);color:var(--gold);border-color:var(--goldbdr);}
+.fs-badge.landed{background:var(--grnbg);color:var(--grn);border-color:var(--grnbdr);}
+.fs-badge.cancelled{background:var(--redbg);color:var(--red);border-color:var(--redbdr);}
+.fs-badge.delayed{background:var(--ambbg);color:var(--amb);border-color:var(--ambbdr);}
+.fs-badge.unknown{background:var(--s3);color:var(--t2);border-color:var(--bdr2);}
+.fs-time{font-size:14px;font-weight:700;color:var(--t0);font-family:var(--fm);}
+.fs-time.late{color:var(--red);}
+.fs-time.early{color:var(--grn);}
+.fs-detail{font-size:12px;color:var(--t2);font-weight:500;}
+.fs-sep{color:var(--t3);font-size:12px;}
+.fs-err{font-size:12px;color:var(--red);font-style:italic;}
+.fs-fetch-btn{font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;padding:5px 11px;border-radius:5px;border:1.5px solid var(--bluebdr);background:var(--bluebg);white-space:nowrap;margin-left:auto;}
+.fs-fetch-btn:active{background:#c0d8f8;}
+.fs-fetch-btn.loading{color:var(--t3);border-color:var(--bdr2);background:var(--s3);pointer-events:none;}
+
+/* DRIVER ROW */
+.driver-row{padding:8px 13px 7px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:7px;background:var(--s2);}
+.driver-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);}
+.driver-name{font-size:14px;font-weight:700;color:var(--amb);}
+.driver-phone{font-size:14px;color:var(--amb);font-family:var(--fm);font-weight:600;margin-left:auto;}
+
+/* PAX ROWS */
+.pax-row{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;border-bottom:1px solid var(--bdr);transition:background .1s;}
+.pax-row:last-child{border-bottom:none;}
+.pax-row.checked{background:var(--grnbg);}
+.pax-cb{width:26px;height:26px;border-radius:6px;border:2px solid var(--bdr3);background:var(--s1);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;cursor:pointer;transition:all .15s;color:transparent;}
+.pax-cb.on{background:var(--grn);border-color:var(--grn);color:#fff;}
+.pax-info{flex:1;min-width:0;}
+.pax-name{font-size:15px;color:var(--t0);font-weight:600;line-height:1.3;}
+.pax-name.on{color:var(--t3);text-decoration:line-through;}
+.pax-sub{font-size:12px;color:var(--t2);font-family:var(--fm);margin-top:2px;font-weight:500;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <span class="mission-id">DLL260527</span>
+    <span class="clock" id="clk">--:--</span>
+  </div>
+  <div class="hdr-date">Mercredi 27 mai 2026 · LYS</div>
+  <div class="hdr-bottom">
+    <div class="pax-prog-wrap">
+      <div class="pax-prog-bar"><div class="pax-prog-fill" id="globalFill" style="width:0%"></div></div>
+      <div class="pax-prog-label">
+        <span id="globalDone">0 embarqués</span>
+        <span id="globalTotal">57 pax total</span>
+      </div>
+    </div>
+    <div class="quota-chip" id="quotaChip" title="Requêtes API restantes ce mois-ci">
+      <span class="quota-n" id="quotaN">—</span>
+      <span class="quota-l">API left</span>
+    </div>
+  </div>
+</div>
+
+<div class="contacts-wrap" id="contactsWrap">
+  <div class="contacts-toggle" onclick="document.getElementById('contactsWrap').classList.toggle('open')">
+    <span class="contacts-toggle-label">Contacts</span>
+    <div class="contacts-toggle-right">
+      <span class="contacts-count">5 personnes</span>
+      <span class="contacts-chevron">▼</span>
+    </div>
+  </div>
+  <div class="contacts-body">
+    <div class="contact-row"><span class="ctag">OPS</span><span class="cname">Alizée</span><a href="tel:+33845309449" class="cphone">+33 84 53 09 49</a></div>
+    <div class="contact-row"><span class="ctag">Astreinte</span><span class="cname">Philibert</span><a href="tel:+33478985649" class="cphone">+33 4 78 98 56 49</a></div>
+    <div class="contact-row"><span class="ctag">PD Ship</span><span class="cname">Mayssan</span><a href="tel:+4915222538141" class="cphone">+49 152 225 38141</a></div>
+    <div class="contact-row"><span class="ctag">Host 1</span><span class="cname">Jean-Philippe</span><a href="tel:+33611076586" class="cphone">+33 6 11 07 65 86</a></div>
+    <div class="contact-row"><span class="ctag">Host 2</span><span class="cname">Joseph</span><a href="tel:+33651093557" class="cphone">+33 6 51 09 35 57</a></div>
+  </div>
+</div>
+
+<div class="inner">
+  <div class="slbl">Stats <span class="slbl-cnt" id="statsLabel">0 / 57</span></div>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-n gold" id="statFlights">9</div><div class="stat-l">Vols</div></div>
+    <div class="stat"><div class="stat-n" id="statPax">51</div><div class="stat-l">Pax total</div></div>
+    <div class="stat"><div class="stat-n grn" id="statDone">0</div><div class="stat-l">Embarqués</div></div>
+  </div>
+  <div class="slbl">Checklist pax <span class="slbl-cnt" id="paxLabel">0 / 51</span></div>
+  <div id="groups"></div>
+</div>
+
+<script>
+const WORKER_URL = "https://tight-queen-ecdf.t5q7m95hfj.workers.dev";
+
+const DATA = [
+  {
+    flight:"EI550", time:"09:30", org:"DUB", priv:false,
+    driver:{name:"Eric",phone:"+33785069680"}, driverDisplay:"+337 85 06 96 80",
+    pax:[
+      {booking:"92521242",name:"Ms. Mary Rose Mercado",cabin:"102"},
+      {booking:"94563491",name:"Mr. Sudhir Suchak",cabin:"114"},
+      {booking:"94563492",name:"Mrs. Susan Suchak",cabin:"114"},
+    ]
+  },
+  {
+    flight:"LH5672", time:"09:55", org:"FRA", priv:false,
+    flightLabel:"LH5672 / EN8910",
+    driver:{name:"Jean-Yves",phone:"+33676919301"}, driverDisplay:"+336 76 91 93 01",
+    pax:[
+      {booking:"88398541",name:"Mrs. Elizabeth Hobbs",cabin:"209"},
+      {booking:"88398542",name:"Mr. Ephraim Hobbs",cabin:"209"},
+      {booking:"95222541",name:"Mr. Larry Neumann",cabin:"232"},
+      {booking:"95222542",name:"Mrs. Diana Neumann",cabin:"232"},
+    ]
+  },
+  {
+    flight:"AF7364", time:"10:30", org:"CDG", priv:false,
+    driver:{name:"Christophe",phone:"+33607747243"}, driverDisplay:"+33 6 07 74 72 43",
+    pax:[
+      {booking:"94078461",name:"Mr. James Koeger",cabin:"339"},
+      {booking:"94078462",name:"Mrs. Nancy Koeger",cabin:"339"},
+    ]
+  },
+  {
+    flight:"TP470", time:"11:55", org:"LIS", priv:false,
+    driver:{name:"Jean-Yves",phone:"+33676919301"}, driverDisplay:"+336 76 91 93 01",
+    pax:[
+      {booking:"92156161",name:"Mr. David Zuschin",cabin:"118"},
+      {booking:"92156162",name:"Mrs. Andrea Zuschin",cabin:"118"},
+      {booking:"96730811",name:"Mrs. Janet Ross",cabin:"303"},
+      {booking:"96730812",name:"Mr. Alan Ross",cabin:"303"},
+    ]
+  },
+  {
+    flight:"SN3587", time:"12:25", org:"BRU", priv:false,
+    driver:{name:"Christophe",phone:"+33607747243"}, driverDisplay:"+33 6 07 74 72 43",
+    pax:[
+      {booking:"94785331",name:"Mr. Eamonn Kelly",cabin:"231"},
+      {booking:"94785332",name:"Mrs. Catherine Kelly",cabin:"231"},
+    ]
+  },
+  {
+    flight:"AA7253", time:"12:50", org:"LHR", priv:true,
+    flightLabel:"AA7253 — HOOPER",
+    driver:{name:"Mickael",phone:"+33682859845"}, driverDisplay:"+33 6 82 85 98 45",
+    pax:[
+      {booking:"94078191",name:"Mr. Stephen Hooper",cabin:"340"},
+      {booking:"94078192",name:"Mrs. Sandra Hooper",cabin:"340"},
+    ]
+  },
+  {
+    flight:"BA356", time:"12:50", org:"LHR", priv:false,
+    flightLabel:"BA356 / AA7253",
+    driver:{name:"Laurent",phone:"+33670039166"}, driverDisplay:"+33 06 70 03 91 66",
+    pax:[
+      {booking:"95392191",name:"Mrs. Alberina Schiavo",cabin:"101"},
+      {booking:"95392192",name:"Mr. Joseph Schiavo",cabin:"101"},
+      {booking:"94477171",name:"Mr. Rodd Mantell",cabin:"106"},
+      {booking:"94477172",name:"Mrs. Beth Mantell",cabin:"106"},
+      {booking:"95352741",name:"Ms. Barbara Rudolph",cabin:"206"},
+      {booking:"95352742",name:"Mr. John Rauch",cabin:"206"},
+      {booking:"91960921",name:"Mr. Vito Coppa",cabin:"116"},
+      {booking:"91960922",name:"Mrs. Abigail Coppa",cabin:"116"},
+      {booking:"94389741",name:"Mrs. Mary Sue Peterson",cabin:"202"},
+      {booking:"94389742",name:"Mr. Harry Peterson",cabin:"202"},
+      {booking:"92137311",name:"Mr. Hervey Andrews",cabin:"325"},
+      {booking:"92137312",name:"Mrs. Karen Andrews",cabin:"325"},
+      {booking:"91401321",name:"Ms. Janet Palombo",cabin:"213"},
+      {booking:"91401322",name:"Ms. Allison Bush",cabin:"213"},
+      {booking:"94471391",name:"Mrs. Alexandra Mill",cabin:"221"},
+      {booking:"94471392",name:"Mr. Andrew Mill",cabin:"221"},
+      {booking:"94826541",name:"Mr. Frank Maier",cabin:"235"},
+      {booking:"94826542",name:"Mrs. Karen Maier",cabin:"235"},
+      {booking:"90327131",name:"Mrs. Nancy Elizabeth Shaw",cabin:"305"},
+      {booking:"90327132",name:"Mr. Roy Malcolm",cabin:"305"},
+      {booking:"94769081",name:"Mr. Joseph Lamont",cabin:"107"},
+      {booking:"94769082",name:"Mrs. Patricia Lamont",cabin:"107"},
+    ]
+  },
+  {
+    flight:"UA8916", time:"13:40", org:"FRA", priv:false,
+    flightLabel:"UA8916 / LH1076",
+    driver:{name:"Jose",phone:"+33780782252"}, driverDisplay:"+33 07 80 78 22 52",
+    pax:[
+      {booking:"92156141",name:"Mr. Timothy Zuschin",cabin:"117"},
+      {booking:"92156142",name:"Mrs. Toby Zuschin",cabin:"117"},
+      {booking:"92156201",name:"Mr. Michael Zuschin",cabin:"119"},
+      {booking:"92156202",name:"Mrs. Ann Zuschin",cabin:"119"},
+      {booking:"93655121",name:"Mr. Walter Lasota",cabin:"223"},
+      {booking:"93655122",name:"Mrs. Maryellen Lasota",cabin:"223"},
+      {booking:"93654661",name:"Mrs. Maryellen Kenney",cabin:"224"},
+      {booking:"93654662",name:"Mr. Walter Kenney",cabin:"224"},
+      {booking:"93655171",name:"Mr. Michael Kitsock",cabin:"225"},
+      {booking:"93655172",name:"Mrs. Joanne Kitsock",cabin:"225"},
+      {booking:"92807301",name:"Mr. Peter Frank",cabin:"315"},
+      {booking:"92807302",name:"Mrs. Sandra Frank",cabin:"315"},
+      {booking:"94548081",name:"Mr. Michael McNamara",cabin:"113"},
+      {booking:"94548082",name:"Mrs. Constance Rogers",cabin:"113"},
+    ]
+  },
+  {
+    flight:"AF7366", time:"13:45", org:"CDG", priv:false,
+    driver:{name:"Jean-Yves",phone:"+33676919301"}, driverDisplay:"+336 76 91 93 01",
+    pax:[
+      {booking:"92847611",name:"Mrs. Gloria Bedrin",cabin:"121"},
+      {booking:"92847612",name:"Mr. Alexander Bedrin",cabin:"121"},
+      {booking:"92562191",name:"Mr. Edward Recka",cabin:"311"},
+      {booking:"92562192",name:"Ms. Toni Wolf",cabin:"311"},
+    ]
+  }
+];
+
+const SORTED=[...DATA].sort((a,b)=>{
+  if(a.time!==b.time)return a.time.localeCompare(b.time);
+  if(a.priv&&!b.priv)return-1;
+  if(!a.priv&&b.priv)return 1;
+  return 0;
+});
+const TOTAL=DATA.reduce((s,g)=>s+g.pax.length,0);
+const state={};
+const cache={};  // stores last fetched data per gi, survives re-taps
+
+// ── QUOTA ──
+function updateQuota(remaining){
+  if(remaining===null||remaining===undefined)return;
+  const n=parseInt(remaining,10);
+  if(isNaN(n))return;
+  const el=document.getElementById('quotaN');
+  const chip=document.getElementById('quotaChip');
+  el.textContent=n;
+  chip.classList.remove('warn','danger');
+  if(n<=10)chip.classList.add('danger');
+  else if(n<=25)chip.classList.add('warn');
+}
+
+// ── UTILS ──
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtTime(iso){
+  if(!iso)return null;
+  try{const d=new Date(iso);return String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0');}
+  catch(e){return null;}
+}
+function fmtDelay(mins){
+  if(!mins||mins===0)return null;
+  const sign=mins>0?'+':'-';const abs=Math.abs(mins);
+  return abs<60?sign+abs+'min':sign+Math.floor(abs/60)+'h'+(abs%60?String(abs%60).padStart(2,'0'):'');
+}
+function statusLabel(s){
+  return{scheduled:'Prévu',active:'En vol',landed:'Atterri',cancelled:'Annulé',incident:'Incident',diverted:'Dérouté'}[s]||s||'—';
+}
+
+// ── PAX ──
+function countDone(){
+  let d=0;
+  SORTED.forEach((g,gi)=>g.pax.forEach((_,pi)=>{if(state[gi+'-'+pi])d++;}));
+  return d;
+}
+function updateGlobals(){
+  const done=countDone();
+  document.getElementById('globalFill').style.width=Math.round(done/TOTAL*100)+'%';
+  document.getElementById('globalDone').textContent=done+' embarqué'+(done!==1?'s':'');
+  document.getElementById('statDone').textContent=done;
+  document.getElementById('statsLabel').textContent=done+' / '+TOTAL;
+  document.getElementById('paxLabel').textContent=done+' / '+TOTAL;
+}
+function updateGroupCount(gi){
+  const g=SORTED[gi];let done=0;
+  g.pax.forEach((_,pi)=>{if(state[gi+'-'+pi])done++;});
+  const pill=document.getElementById('gcnt-'+gi);
+  if(pill){pill.textContent=done+'/'+g.pax.length;pill.className='flight-paxcount'+(done===g.pax.length?' done':'');}
+}
+function togglePax(gi,pi){
+  const key=gi+'-'+pi;state[key]=!state[key];const on=state[key];
+  document.getElementById('pr-'+gi+'-'+pi)?.classList.toggle('checked',on);
+  const cb=document.getElementById('cb-'+gi+'-'+pi);
+  if(cb){cb.classList.toggle('on',on);cb.textContent=on?'✓':'';}
+  document.getElementById('nm-'+gi+'-'+pi)?.classList.toggle('on',on);
+  updateGroupCount(gi);updateGlobals();
+}
+function toggleGroup(gi){document.getElementById('fg-'+gi).classList.toggle('open');}
+function toggleFsp(gi){document.getElementById('fspw-'+gi).classList.toggle('open');}
+
+// ── FLIGHT STATUS RENDERING ──
+function renderInline(gi,data,loading,err){
+  // Updates the collapsed summary line inside the toggle bar
+  const inl=document.getElementById('fsp-inline-'+gi);
+  if(!inl)return;
+  if(loading){inl.innerHTML='<span style="font-size:12px;color:var(--t3)">Chargement…</span>';return;}
+  if(err||!data){inl.innerHTML=`<span style="font-size:12px;color:var(--red)">${esc(err||'Erreur')}</span>`;return;}
+
+  const arr=data.arrival||{};const status=data.flight_status||'unknown';
+  const arrTime=fmtTime(arr.actual)||fmtTime(arr.estimated)||fmtTime(arr.scheduled)||'—';
+  const delayMins=arr.delay||data.departure?.delay||null;
+  const delayStr=fmtDelay(delayMins);
+  let statusCls='unknown';
+  if(status==='scheduled')statusCls='scheduled';
+  else if(status==='active')statusCls='active';
+  else if(status==='landed')statusCls='landed';
+  else if(status==='cancelled')statusCls='cancelled';
+  else if(delayMins>15)statusCls='delayed';
+  let timeCls='';
+  if(delayMins>15)timeCls=' late';
+  else if(delayMins<-5)timeCls=' early';
+
+  inl.innerHTML=`<span class="fs-badge ${statusCls}">${esc(statusLabel(status))}</span>`+
+    `<span class="fs-time${timeCls}" style="font-size:13px">${esc(arrTime)}</span>`+
+    (delayStr?`<span class="fs-sep">·</span><span class="fs-detail">${esc(delayStr)}</span>`:'');
+}
+
+function renderBody(gi,data,loading,err){
+  const body=document.getElementById('fsp-body-'+gi);
+  const btn=document.getElementById('fsp-btn-'+gi);
+  if(!body)return;
+
+  if(loading){
+    body.innerHTML='<span class="fs-detail" style="color:var(--t3)">Chargement…</span>';
+    if(btn){btn.textContent='…';btn.classList.add('loading');}
+    return;
+  }
+  if(btn){btn.textContent='↻ Actualiser';btn.classList.remove('loading');}
+
+  if(err||!data){
+    body.innerHTML=`<span class="fs-err">${esc(err||'Données indisponibles')}</span>`;
+    return;
+  }
+
+  const arr=data.arrival||{};const dep=data.departure||{};
+  const status=data.flight_status||'unknown';
+  const arrActual=fmtTime(arr.actual);
+  const arrEst=fmtTime(arr.estimated);
+  const arrSched=fmtTime(arr.scheduled);
+  const arrDisplay=arrActual||arrEst||arrSched||'—';
+  const delayMins=arr.delay||dep.delay||null;
+  const delayStr=fmtDelay(delayMins);
+  let statusCls='unknown';
+  if(status==='scheduled')statusCls='scheduled';
+  else if(status==='active')statusCls='active';
+  else if(status==='landed')statusCls='landed';
+  else if(status==='cancelled')statusCls='cancelled';
+  else if(delayMins>15)statusCls='delayed';
+  let timeCls='';
+  if(delayMins>15)timeCls=' late';
+  else if(delayMins<-5)timeCls=' early';
+
+  const terminal=arr.terminal?`T${arr.terminal}`:'';
+  const baggage=arr.baggage?`Tapis ${arr.baggage}`:'';
+  const details=[delayStr,terminal,baggage].filter(Boolean);
+
+  body.innerHTML=`<span class="fs-badge ${statusCls}">${esc(statusLabel(status))}</span>`+
+    `<span class="fs-time${timeCls}">${esc(arrDisplay)}</span>`+
+    (details.length?`<span class="fs-sep">·</span><span class="fs-detail">${details.map(esc).join(' · ')}</span>`:'');
+}
+
+// ── FETCH (1 call per tap) ──
+async function fetchFlight(gi,fromBtn){
+  if(fromBtn)fromBtn.preventDefault();
+  const g=SORTED[gi];if(!g)return;
+
+  const proxyOk=WORKER_URL&&WORKER_URL!=='WORKER_URL';
+  if(!proxyOk){
+    renderInline(gi,null,false,'Worker non configuré');
+    renderBody(gi,null,false,'Remplace WORKER_URL dans le fichier par l\'URL de ton worker Cloudflare.');
+    document.getElementById('fspw-'+gi).classList.add('open');
+    return;
+  }
+
+  renderInline(gi,null,true,null);
+  renderBody(gi,null,true,null);
+  document.getElementById('fspw-'+gi).classList.add('open');
+
+  try{
+    const r=await fetch(`${WORKER_URL}?flight=${encodeURIComponent(g.flight)}`,{signal:AbortSignal.timeout(12000)});
+    // Read quota from response headers if worker forwards them
+    const remaining=r.headers.get('x-quota-remaining');
+    if(remaining)updateQuota(remaining);
+    if(!r.ok)throw new Error(`HTTP ${r.status}`);
+    const json=await r.json();
+    if(json.error)throw new Error(json.error.message||'API error');
+    const flights=json.data||[];
+    if(!flights.length){renderInline(gi,null,false,'Vol non trouvé');renderBody(gi,null,false,'Vol non trouvé — réessaie plus tard');return;}
+    const lys=flights.find(f=>f.arrival?.iata==='LYS')||flights[0];
+    cache[gi]=lys;
+    renderInline(gi,lys,false,null);
+    renderBody(gi,lys,false,null);
+  }catch(e){
+    renderInline(gi,null,false,e.message);
+    renderBody(gi,null,false,e.message);
+  }
+}
+
+// ── RENDER ──
+function render(){
+  const wrap=document.getElementById('groups');
+  let html='';
+  SORTED.forEach((g,gi)=>{
+    const total=g.pax.length;
+    const label=g.flightLabel||g.flight;
+    const privCls=g.priv?' private':'';
+    html+=`<div class="fgroup${privCls}" id="fg-${gi}">
+      <div class="fgroup-hdr" onclick="toggleGroup(${gi})">
+        <span class="flight-badge">${esc(label)}</span>
+        <span class="flight-time">${esc(g.time)}</span>
+        ${g.priv?'<span class="private-tag">Privé</span>':''}
+        <span class="flight-org">${esc(g.org)}</span>
+        <span class="flight-paxcount" id="gcnt-${gi}">0/${total}</span>
+        <span class="fgroup-chevron">▼</span>
+      </div>
+      <div class="fgroup-body">
+        <div class="fsp-wrap" id="fspw-${gi}">
+          <div class="fsp-toggle" onclick="toggleFsp(${gi})">
+            <span class="fsp-toggle-lbl">✈ Statut vol</span>
+            <span class="fsp-status-inline" id="fsp-inline-${gi}">
+              <span style="font-size:12px;color:var(--t3)">Non chargé</span>
+            </span>
+            <button class="fs-fetch-btn" id="fsp-btn-${gi}"
+              onclick="event.stopPropagation();fetchFlight(${gi})">↻ Vérifier</button>
+            <span class="fsp-open-chevron">▼</span>
+          </div>
+          <div class="fsp-body" id="fsp-body-${gi}">
+            <span class="fs-detail" style="color:var(--t3)">Appuie sur ↻ Vérifier pour charger.</span>
+          </div>
+        </div>
+        <div class="driver-row">
+          <span class="driver-lbl">Chauffeur</span>
+          <span class="driver-name">${esc(g.driver.name)}</span>
+          <a href="tel:${g.driver.phone}" class="driver-phone" onclick="event.stopPropagation()">${esc(g.driverDisplay)}</a>
+        </div>
+        ${g.pax.map((p,pi)=>`
+        <div class="pax-row" id="pr-${gi}-${pi}">
+          <div class="pax-cb" id="cb-${gi}-${pi}" onclick="togglePax(${gi},${pi})"></div>
+          <div class="pax-info">
+            <div class="pax-name" id="nm-${gi}-${pi}">${esc(p.name)}</div>
+            <div class="pax-sub">Cabin ${esc(p.cabin)} · ${esc(p.booking)}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  });
+  wrap.innerHTML=html;
+  document.getElementById('statPax').textContent=TOTAL;
+  document.getElementById('statFlights').textContent=SORTED.length;
+  updateGlobals();
+}
+
+function tick(){
+  const n=new Date();
+  document.getElementById('clk').textContent=
+    String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+}
+
+render();tick();
+setInterval(tick,10000);
+// NO auto-refresh — every API call is manual to conserve quota
+</script>
+</body>
+</html>
